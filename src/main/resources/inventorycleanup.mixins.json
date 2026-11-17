@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.airz.inventorycleanup.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "inventorycleanup.refmap.json",
+  "client": ["InventoryScreenMixin"],
+  "injectors": { "defaultRequire": 1 }
+}
