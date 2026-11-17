@@ -31,7 +31,7 @@ public abstract class CuriosContainerMixin {
             addSlot.setAccessible(true);
 
             for (int i = 0; i < equipmentSlots.length; i++) {
-                Slot slot = (Slot) constructor.newInstance(player, equipmentSlots[i], 26, 8 + i * 18);
+                Slot slot = (Slot) constructor.newInstance(player, equipmentSlots[i], 77, 8 + i * 18);
                 addSlot.invoke(this, slot);
             }
         } catch (ClassNotFoundException ignored) {
