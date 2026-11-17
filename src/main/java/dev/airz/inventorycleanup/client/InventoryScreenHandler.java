@@ -72,7 +72,7 @@ public final class InventoryScreenHandler {
     private static void addInventoryTab(Screen screen, boolean alreadyInventory) {
         int left = screen instanceof InventoryScreen inventory ? inventory.getGuiLeft() : (screen.width - 176) / 2;
         int top = screen instanceof InventoryScreen inventory ? inventory.getGuiTop() : (screen.height - 166) / 2;
-        Button tab = Button.builder(Component.translatable("inventorycleanup.tab.inventory"), button -> {
+        Button tab = Button.builder(Component.empty(), button -> {
             if (!alreadyInventory && Minecraft.getInstance().player != null) {
                 Minecraft.getInstance().setScreen(new InventoryScreen(Minecraft.getInstance().player));
             }
