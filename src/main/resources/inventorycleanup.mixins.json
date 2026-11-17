@@ -6,11 +6,11 @@
   "refmap": "inventorycleanup.refmap.json",
   "mixins": [
     "InventoryMenuMixin",
-    "CuriosContainerMixin",
-    "CuriosClientPacketsMixin"
+    "CuriosContainerMixin"
   ],
   "client": [
     "InventoryScreenMixin",
+    "CuriosClientPacketsMixin",
     "AbstractContainerScreenAccessor",
     "client.SlotPositionAccessor"
   ],
