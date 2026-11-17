@@ -293,8 +293,9 @@ public final class InventoryScreenHandler {
             minY = Math.min(minY, slot.y);
         }
         int maxY = allCurioSlots.stream().mapToInt(slot -> slot.y).max().orElse(minY);
-        int centerColumn = columns.stream().skip((columns.size() - 1) / 2).findFirst().orElse(minX);
-        int checkboxX = left + centerColumn + 2;
+        int maxX = columns.stream().mapToInt(Integer::intValue).max().orElse(minX);
+        // Center the 12px checkbox beneath the full slot grid, including even-column layouts.
+        int checkboxX = left + (minX + maxX + 18) / 2 - 6;
         int checkboxY = top + maxY + 20;
         event.addListener(new CuriosRenderCheckbox(checkboxX, checkboxY, toggleableSlots));
     }
@@ -317,11 +318,11 @@ public final class InventoryScreenHandler {
             boolean render = !allRendered;
             renderOverride = render;
             setFocused(false);
+            // CPacketToggleRender is an explicit toggle packet. Always send one for
+            // every eligible slot: the client slot state can lag behind rapid clicks.
             for (CurioSlot slot : slots) {
-                if (slot.getRenderStatus() != render) {
-                    PacketDistributor.sendToServer(
-                            new CPacketToggleRender(slot.getIdentifier(), slot.getSlotIndex()));
-                }
+                PacketDistributor.sendToServer(
+                        new CPacketToggleRender(slot.getIdentifier(), slot.getSlotIndex()));
             }
         }
 
