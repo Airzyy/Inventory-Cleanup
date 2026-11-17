@@ -4,10 +4,8 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,19 +28,37 @@ public final class InventoryScreenHandler {
                 if (name.equals("top.theillusivec4.curios.client.gui.CuriosButton")
                         || name.equals("dev.shadowsoffire.apothic_attributes.client.AttributesGui")
                         || name.startsWith("dev.shadowsoffire.apothic_attributes.client.AttributesGui$")) {
-                    screen.removeWidget(listener);
+                    event.removeListener(listener);
                 }
             }
 
             // Reskillable's tab uses GUI-relative coordinates. Put it beside the new inventory tab.
             setReskillableTabPosition(31, -28);
             moveExistingReskillableTab(screen, 31, -28);
-            addInventoryTab(screen, true);
+            addInventoryTab(event, screen, true);
         } else if (screen.getClass().getName().equals("net.bandit.reskillable.client.screen.SkillScreen")) {
             setReskillableTabPosition(31, -28);
             moveExistingReskillableTab(screen, 31, -28);
-            addInventoryTab(screen, false);
+            addInventoryTab(event, screen, false);
         }
+    }
+
+
+    @SubscribeEvent
+    public static void onScreenRender(ScreenEvent.Render.Post event) {
+        Screen screen = event.getScreen();
+        int left;
+        int top;
+        if (screen instanceof InventoryScreen inventory) {
+            left = inventory.getGuiLeft();
+            top = inventory.getGuiTop();
+        } else if (screen.getClass().getName().equals("net.bandit.reskillable.client.screen.SkillScreen")) {
+            left = (screen.width - 176) / 2;
+            top = (screen.height - 166) / 2;
+        } else {
+            return;
+        }
+        event.getGuiGraphics().renderItem(net.minecraft.world.item.Items.CHEST.getDefaultInstance(), left + 8, top - 22);
     }
 
     private static void setReskillableTabPosition(int x, int y) {
@@ -70,7 +86,7 @@ public final class InventoryScreenHandler {
         }
     }
 
-    private static void addInventoryTab(Screen screen, boolean alreadyInventory) {
+    private static void addInventoryTab(ScreenEvent.Init.Post event, Screen screen, boolean alreadyInventory) {
         int left = screen instanceof InventoryScreen inventory ? inventory.getGuiLeft() : (screen.width - 176) / 2;
         int top = screen instanceof InventoryScreen inventory ? inventory.getGuiTop() : (screen.height - 166) / 2;
         Button tab = Button.builder(Component.empty(), button -> {
@@ -80,9 +96,6 @@ public final class InventoryScreenHandler {
         }).bounds(left, top - 28, 31, 28).tooltip(
                 net.minecraft.client.gui.components.Tooltip.create(Component.translatable("inventorycleanup.tab.inventory")))
                 .build();
-        screen.addRenderableWidget(tab);
-        Renderable icon = (graphics, mouseX, mouseY, partialTick) ->
-                graphics.renderItem(Items.CHEST.getDefaultInstance(), left + 8, top - 22);
-        screen.addRenderableOnly(icon);
+        event.addListener(tab);
     }
 }
