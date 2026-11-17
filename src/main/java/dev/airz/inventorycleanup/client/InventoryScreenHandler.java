@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
@@ -24,7 +23,7 @@ public final class InventoryScreenHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
-        if (screen instanceof InventoryScreen && !(screen instanceof CreativeModeInventoryScreen)) {
+        if (screen instanceof InventoryScreen) {
             // Remove the Curios launcher and Apothic Attributes panel/button from this screen only.
             for (GuiEventListener listener : List.copyOf(screen.children())) {
                 String name = listener.getClass().getName();
