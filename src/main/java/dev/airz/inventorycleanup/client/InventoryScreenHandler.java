@@ -293,15 +293,17 @@ public final class InventoryScreenHandler {
             minY = Math.min(minY, slot.y);
         }
         int columnCount = Math.max(1, columns.size());
-        int nextIndex = allCurioSlots.size();
-        int checkboxX = left + minX + (nextIndex % columnCount) * 18 + 2;
-        int checkboxY = top + minY + (nextIndex / columnCount) * 18 + 2;
+        int maxY = allCurioSlots.stream().mapToInt(slot -> slot.y).max().orElse(minY);
+        int centerColumn = columns.stream().skip((columns.size() - 1) / 2).findFirst().orElse(minX);
+        int checkboxX = left + centerColumn + 2;
+        int checkboxY = top + maxY + 20;
         event.addListener(new CuriosRenderCheckbox(checkboxX, checkboxY, toggleableSlots));
     }
 
     /** A compact, unlabeled master switch for Curios item rendering. */
     private static final class CuriosRenderCheckbox extends AbstractButton {
         private final List<CurioSlot> slots;
+        private Boolean renderOverride;
 
         private CuriosRenderCheckbox(int x, int y, List<CurioSlot> slots) {
             super(x, y, 12, 12, Component.empty());
@@ -313,6 +315,8 @@ public final class InventoryScreenHandler {
             boolean allRendered = !slots.isEmpty()
                     && slots.stream().allMatch(CurioSlot::getRenderStatus);
             boolean render = !allRendered;
+            renderOverride = render;
+            setFocused(false);
             for (CurioSlot slot : slots) {
                 if (slot.getRenderStatus() != render) {
                     PacketDistributor.sendToServer(
@@ -330,13 +334,18 @@ public final class InventoryScreenHandler {
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int x = getX();
             int y = getY();
-            int border = isHoveredOrFocused() ? 0xFFFFFFFF : 0xFF171717;
+            int border = isHovered() ? 0xFFFFFFFF : 0xFF171717;
             graphics.fill(x, y, x + 12, y + 12, border);
             graphics.fill(x + 1, y + 1, x + 11, y + 11, 0xFF777777);
             graphics.fill(x + 2, y + 2, x + 10, y + 10, 0xFF303030);
 
-            boolean checked = !slots.isEmpty()
-                    && slots.stream().allMatch(CurioSlot::getRenderStatus);
+            boolean serverStateMatchesOverride = renderOverride != null
+                    && !slots.isEmpty()
+                    && slots.stream().allMatch(slot -> slot.getRenderStatus() == renderOverride);
+            if (serverStateMatchesOverride) renderOverride = null;
+            boolean checked = renderOverride != null
+                    ? renderOverride
+                    : !slots.isEmpty() && slots.stream().allMatch(CurioSlot::getRenderStatus);
             if (checked) {
                 // Pixel checkmark, matching the inventory's compact slot styling.
                 graphics.fill(x + 2, y + 6, x + 4, y + 8, 0xFFFFFFFF);
