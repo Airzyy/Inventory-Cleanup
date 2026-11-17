@@ -54,7 +54,7 @@ public final class InventoryScreenHandler {
         if (screen instanceof InventoryScreen inventoryScreen) {
             RecipeBookComponent recipeBook = inventoryScreen.getRecipeBookComponent();
             if (recipeBook.isVisible()) recipeBook.toggleVisibility();
-            if (recipeBook instanceof GuiEventListener listener) event.removeListener(listener);
+            event.removeListener(recipeBook);
         } else if (curios) {
             removeCuriosRecipeBook(event, screen);
         }
@@ -136,7 +136,7 @@ public final class InventoryScreenHandler {
             int slotTop = top + 8;
             int slotBottom = slotTop + slots.length * 18;
 
-            if (mouseX < left + 8 || mouseX >= left + 44
+            if (mouseX < left + 76 || mouseX >= left + 94
                     || mouseY < slotTop || mouseY >= slotBottom) {
                 visibleField.set(null, null);
                 return;
@@ -151,8 +151,8 @@ public final class InventoryScreenHandler {
             visibleField.set(null, slots[index]);
             int y = slotTop + index * 18;
             var graphics = event.getGuiGraphics();
-            graphics.fill(left + 6, y - 2, left + 45, y + 19, 0xFF000000);
-            graphics.fill(left + 7, y - 1, left + 44, y + 18, 0xFFC6C6C6);
+            graphics.fill(left + 75, y - 2, left + 94, y + 19, 0xFF000000);
+            graphics.fill(left + 76, y - 1, left + 93, y + 18, 0xFFC6C6C6);
         } catch (ReflectiveOperationException ignored) {
             // Cosmetic Slots is optional.
         }
