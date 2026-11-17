@@ -6,7 +6,8 @@
   "refmap": "inventorycleanup.refmap.json",
   "mixins": [
     "InventoryMenuMixin",
-    "CuriosContainerMixin"
+    "CuriosContainerMixin",
+    "CuriosClientPacketsMixin"
   ],
   "client": [
     "InventoryScreenMixin",
