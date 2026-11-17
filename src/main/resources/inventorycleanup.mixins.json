@@ -11,7 +11,7 @@
   "client": [
     "InventoryScreenMixin",
     "AbstractContainerScreenAccessor",
-    "SlotPositionAccessor"
+    "client.SlotPositionAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
