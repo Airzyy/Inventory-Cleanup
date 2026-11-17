@@ -21,7 +21,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;\nimport net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;\nimport net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
@@ -50,9 +51,18 @@ public final class InventoryScreenHandler {
         if (player != null) CuriosMenuSlots.addToInventoryMenu(player, player.inventoryMenu);
     }
 
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        var player = Minecraft.getInstance().player;
+        if (player != null && !player.isCreative()) {
+            CuriosMenuSlots.addToInventoryMenu(player, player.inventoryMenu);
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
+        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative()) return;
         boolean inventory = screen instanceof InventoryScreen;
         boolean skills = screen.getClass().getName().equals(SKILL_SCREEN);
         boolean curios = screen.getClass().getName().equals(CURIOS_SCREEN);
