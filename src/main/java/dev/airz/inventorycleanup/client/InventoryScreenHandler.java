@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -20,7 +21,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 public final class InventoryScreenHandler {
     private InventoryScreenHandler() {}
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
         if (screen instanceof InventoryScreen && !(screen instanceof CreativeModeInventoryScreen)) {
@@ -28,6 +29,7 @@ public final class InventoryScreenHandler {
             for (GuiEventListener listener : List.copyOf(screen.children())) {
                 String name = listener.getClass().getName();
                 if (name.equals("top.theillusivec4.curios.client.gui.CuriosButton")
+                        || name.equals("dev.shadowsoffire.apothic_attributes.client.AttributesGui")
                         || name.startsWith("dev.shadowsoffire.apothic_attributes.client.AttributesGui$")) {
                     screen.removeWidget(listener);
                 }
