@@ -269,8 +269,8 @@ public final class InventoryScreenHandler {
         } catch (ReflectiveOperationException ignored) {
             // Cosmetic Slots is optional.
         }
+    }
 
-    
     private static void addCuriosRenderToggle(ScreenEvent.Init.Post event,
                                                InventoryScreen screen, int left, int top) {
         List<CurioSlot> allCurioSlots = screen.getMenu().slots.stream()
@@ -339,6 +339,5 @@ public final class InventoryScreenHandler {
                 graphics.fill(x + 8, y + 4, x + 10, y + 6, 0xFFFFFFFF);
             }
         }
-    }
     }
 }
