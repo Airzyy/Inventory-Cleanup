@@ -29,7 +29,7 @@ repositories {
 dependencies {
     implementation 'org.spongepowered:mixin:0.8.7'
     annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
-    compileOnly "top.theillusivec4.curios:curios-neoforge:${props.result.content.match(/neo_version=(.*)/)[1] ? '${project.curios_version}' : '9.5.1+1.21.1'}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${project.curios_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
