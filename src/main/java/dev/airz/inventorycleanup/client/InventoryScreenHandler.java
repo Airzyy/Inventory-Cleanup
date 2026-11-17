@@ -78,6 +78,24 @@ public final class InventoryScreenHandler {
         event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
     }
 
+    private static Slot findWrappedSlot(Slot wrapper) {
+        // SlotWrapper's backing-slot field name differs between mappings/builds.
+        // Find the actual Slot field instead of depending on one private name.
+        for (Class<?> type = wrapper.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (!Slot.class.isAssignableFrom(field.getType())) continue;
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(wrapper);
+                    if (value instanceof Slot target) return target;
+                } catch (ReflectiveOperationException | RuntimeException ignored) {
+                    // Try the next field if this mapping exposes an inaccessible member.
+                }
+            }
+        }
+        return null;
+    }
+
     private static void removeCuriosSlotsFromCreativeMenu(CreativeModeInventoryScreen screen) {
         try {
             AbstractContainerMenu menu = screen.getMenu();
@@ -88,9 +106,8 @@ public final class InventoryScreenHandler {
                         "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen$SlotWrapper")) {
                     continue;
                 }
-                Field targetField = slot.getClass().getDeclaredField("target");
-                targetField.setAccessible(true);
-                if (!(targetField.get(slot) instanceof top.theillusivec4.curios.common.inventory.CurioSlot)) {
+                Slot wrappedSlot = findWrappedSlot(slot);
+                if (!(wrappedSlot instanceof top.theillusivec4.curios.common.inventory.CurioSlot)) {
                     continue;
                 }
 
