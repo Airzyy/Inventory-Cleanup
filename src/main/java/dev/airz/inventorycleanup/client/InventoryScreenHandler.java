@@ -121,9 +121,11 @@ public final class InventoryScreenHandler {
         event.addListener(new InventoryTabButton(screen, InventoryTabButton.Kind.SKILLS, null, index++));
 
         if (player == null) return;
+        int backpackTabCount = 0;
         for (BackpackCompat.BackpackRef backpack : BackpackCompat.findBackpacks(player)) {
-            if (!InventoryTabButton.fitsOnScreen(screen, index)) break;
+            if (backpackTabCount >= 4 || !InventoryTabButton.fitsOnScreen(screen, index)) break;
             event.addListener(new InventoryTabButton(screen, InventoryTabButton.Kind.BACKPACK, backpack, index++));
+            backpackTabCount++;
         }
     }
 
