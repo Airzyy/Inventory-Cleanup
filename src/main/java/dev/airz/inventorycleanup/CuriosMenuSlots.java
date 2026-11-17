@@ -16,6 +16,9 @@ public final class CuriosMenuSlots {
     private CuriosMenuSlots() {}
 
     public static void addToInventoryMenu(Player player, InventoryMenu menu) {
+        // The compact Curios panel is intentionally survival/adventure-only.
+        if (player == null || player.isCreative()) return;
+
         for (Slot slot : menu.slots) {
             if (slot instanceof CurioSlot) return;
         }
