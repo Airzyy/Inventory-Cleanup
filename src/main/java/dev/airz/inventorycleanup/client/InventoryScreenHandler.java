@@ -292,7 +292,6 @@ public final class InventoryScreenHandler {
             minX = Math.min(minX, slot.x);
             minY = Math.min(minY, slot.y);
         }
-        int columnCount = Math.max(1, columns.size());
         int maxY = allCurioSlots.stream().mapToInt(slot -> slot.y).max().orElse(minY);
         int centerColumn = columns.stream().skip((columns.size() - 1) / 2).findFirst().orElse(minX);
         int checkboxX = left + centerColumn + 2;
@@ -312,8 +311,9 @@ public final class InventoryScreenHandler {
 
         @Override
         public void onPress() {
-            boolean allRendered = !slots.isEmpty()
-                    && slots.stream().allMatch(CurioSlot::getRenderStatus);
+            boolean allRendered = renderOverride != null
+                    ? renderOverride
+                    : !slots.isEmpty() && slots.stream().allMatch(CurioSlot::getRenderStatus);
             boolean render = !allRendered;
             renderOverride = render;
             setFocused(false);
