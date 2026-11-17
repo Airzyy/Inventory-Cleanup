@@ -7,13 +7,21 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import top.theillusivec4.curios.common.inventory.CurioSlot;
+import top.theillusivec4.curios.common.network.client.CPacketToggleRender;
+import net.neoforged.neoforge.network.PacketDistributor;
+import java.util.ArrayList;
+import java.util.TreeSet;
 import dev.airz.inventorycleanup.mixin.client.SlotPositionAccessor;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
@@ -85,6 +93,9 @@ public final class InventoryScreenHandler {
         int top = getGuiTop(screen);
         event.addListener(new InventoryTabButton(screen, left, top - 28, true));
         event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
+        if (inventory) {
+            addCuriosRenderToggle(event, (InventoryScreen) screen, left, top);
+        }
     }
 
     private static void setCuriosSlotsVisible(AbstractContainerMenu menu, boolean visible) {
@@ -258,5 +269,74 @@ public final class InventoryScreenHandler {
         } catch (ReflectiveOperationException ignored) {
             // Cosmetic Slots is optional.
         }
+
+    
+    private static void addCuriosRenderToggle(ScreenEvent.Init.Post event,
+                                               InventoryScreen screen, int left, int top) {
+        List<CurioSlot> curioSlots = screen.getMenu().slots.stream()
+                .filter(slot -> slot instanceof CurioSlot)
+                .map(slot -> (CurioSlot) slot)
+                .filter(CurioSlot::canToggleRender)
+                .toList();
+        if (curioSlots.isEmpty()) return;
+
+        // CuriosMenuSlots lays slots out in columns, eight rows at a time.
+        TreeSet<Integer> columns = new TreeSet<>();
+        int minX = Integer.MAX_VALUE;
+        int minY = Integer.MAX_VALUE;
+        for (CurioSlot slot : curioSlots) {
+            columns.add(slot.x);
+            minX = Math.min(minX, slot.x);
+            minY = Math.min(minY, slot.y);
+        }
+        int columnCount = Math.max(1, columns.size());
+        int nextIndex = curioSlots.size();
+        int checkboxX = left + minX + (nextIndex % columnCount) * 18 + 2;
+        int checkboxY = top + minY + (nextIndex / columnCount) * 18 + 2;
+        event.addListener(new CuriosRenderCheckbox(checkboxX, checkboxY, curioSlots));
+    }
+
+    /** A compact, unlabeled master switch for Curios item rendering. */
+    private static final class CuriosRenderCheckbox extends AbstractButton {
+        private final List<CurioSlot> slots;
+
+        private CuriosRenderCheckbox(int x, int y, List<CurioSlot> slots) {
+            super(x, y, 12, 12, Component.empty());
+            this.slots = new ArrayList<>(slots);
+        }
+
+        @Override
+        public void onPress() {
+            boolean allRendered = !slots.isEmpty()
+                    && slots.stream().allMatch(CurioSlot::getRenderStatus);
+            boolean render = !allRendered;
+            for (CurioSlot slot : slots) {
+                if (slot.getRenderStatus() != render) {
+                    PacketDistributor.sendToServer(
+                            new CPacketToggleRender(slot.getIdentifier(), slot.getSlotIndex()));
+                }
+            }
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            int x = getX();
+            int y = getY();
+            int border = isHoveredOrFocused() ? 0xFFFFFFFF : 0xFF171717;
+            graphics.fill(x, y, x + 12, y + 12, border);
+            graphics.fill(x + 1, y + 1, x + 11, y + 11, 0xFF777777);
+            graphics.fill(x + 2, y + 2, x + 10, y + 10, 0xFF303030);
+
+            boolean checked = !slots.isEmpty()
+                    && slots.stream().allMatch(CurioSlot::getRenderStatus);
+            if (checked) {
+                // Pixel checkmark, matching the inventory's compact slot styling.
+                graphics.fill(x + 2, y + 6, x + 4, y + 8, 0xFFFFFFFF);
+                graphics.fill(x + 4, y + 8, x + 6, y + 10, 0xFFFFFFFF);
+                graphics.fill(x + 6, y + 6, x + 8, y + 8, 0xFFFFFFFF);
+                graphics.fill(x + 8, y + 4, x + 10, y + 6, 0xFFFFFFFF);
+            }
+        }
+    }
     }
 }
