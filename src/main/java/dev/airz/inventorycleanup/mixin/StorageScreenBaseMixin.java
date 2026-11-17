@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * <p>Targeted by name so Sophisticated Core is not needed at compile time. {@code require = 0}
  * means a future rename inside Sophisticated Core just loses the spacing instead of crashing.
  */
+@Pseudo
 @Mixin(targets = "net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase", remap = false)
 public abstract class StorageScreenBaseMixin {
     @ModifyVariable(method = "updateDimensionsAndSlotPositions", at = @At("HEAD"), argsOnly = true,
