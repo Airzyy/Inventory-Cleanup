@@ -1,6 +1,5 @@
 package dev.airz.inventorycleanup.mixin;
 
-import dev.airz.inventorycleanup.CuriosMenuSlots;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -18,12 +17,6 @@ import top.theillusivec4.curios.common.inventory.CurioSlot;
 public abstract class InventoryMenuMixin {
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     private void inventorycleanup$addCuriosSlots(Inventory inventory, boolean active, Player owner, CallbackInfo ci) {
-        // The integrated server constructs its menu before the client has necessarily
-        // received Curios' initial capability sync. Build the authoritative server layout
-        // here; the client mirrors it when the inventory screen is first initialized.
-        if (!owner.level().isClientSide) {
-            CuriosMenuSlots.addToInventoryMenu(owner, (InventoryMenu) (Object) this);
-        }
     }
 
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true, remap = false)
