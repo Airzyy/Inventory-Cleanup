@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -52,7 +53,8 @@ public final class InventoryScreenHandler {
 
         for (GuiEventListener listener : List.copyOf(screen.children())) {
             String name = listener.getClass().getName();
-            if (name.equals(RESKILLABLE_TAB)
+            if ((inventory && listener instanceof ImageButton)
+                    || name.equals(RESKILLABLE_TAB)
                     || name.equals("top.theillusivec4.curios.client.gui.button.CuriosButton")
                     || name.equals("top.theillusivec4.curios.client.gui.CuriosButton")
                     || name.equals("dev.shadowsoffire.apothic_attributes.client.AttributesGui")
