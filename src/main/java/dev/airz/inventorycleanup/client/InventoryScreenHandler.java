@@ -66,7 +66,7 @@ public final class InventoryScreenHandler {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
         if (screen instanceof CreativeModeInventoryScreen creativeScreen) {
-            removeCuriosSlotsFromCreativeMenu(creativeScreen.getMenu());
+            removeCuriosSlotsFromCreativeMenu(creativeScreen);
             return;
         }
         if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative()) return;
@@ -102,8 +102,9 @@ public final class InventoryScreenHandler {
         event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
     }
 
-    private static void removeCuriosSlotsFromCreativeMenu(AbstractContainerMenu menu) {
+    private static void removeCuriosSlotsFromCreativeMenu(CreativeModeInventoryScreen screen) {
         try {
+            AbstractContainerMenu menu = screen.getMenu();
             List<Slot> slots = menu.slots;
             for (int i = slots.size() - 1; i >= 0; i--) {
                 Slot slot = slots.get(i);
@@ -119,9 +120,16 @@ public final class InventoryScreenHandler {
 
                 int originalSize = slots.size();
                 slots.remove(i);
+                Field originalSlotsField = CreativeModeInventoryScreen.class.getDeclaredField("originalSlots");
+                originalSlotsField.setAccessible(true);
+                Object originalSlotsValue = originalSlotsField.get(screen);
+                if (originalSlotsValue instanceof List<?> originalSlots && originalSlots != slots) {
+                    try { ((List<?>) originalSlots).remove(slot); } catch (UnsupportedOperationException ignored) {}
+                }
                 // Creative's wrapper menu is client-only. Keep its parallel slot snapshots aligned.
                 for (Class<?> type = menu.getClass(); type != null; type = type.getSuperclass()) {
                     for (Field field : type.getDeclaredFields()) {
+                        if (!field.getName().equals("lastSlots") && !field.getName().equals("remoteSlots")) continue;
                         if (!List.class.isAssignableFrom(field.getType())) continue;
                         field.setAccessible(true);
                         Object value = field.get(menu);
