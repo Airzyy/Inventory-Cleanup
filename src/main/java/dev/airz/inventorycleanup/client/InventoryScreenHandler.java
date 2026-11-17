@@ -43,6 +43,13 @@ public final class InventoryScreenHandler {
         CuriosMenuSlots.addToInventoryMenu(player, player.inventoryMenu);
     }
 
+
+    @SubscribeEvent
+    public static void onClientPlayerClone(ClientPlayerNetworkEvent.Clone event) {
+        var player = event.getPlayer();
+        if (player != null) CuriosMenuSlots.addToInventoryMenu(player, player.inventoryMenu);
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
