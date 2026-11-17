@@ -23,10 +23,10 @@ public abstract class AbstractContainerScreenMixin {
         int y = (int) mouseY - screen.getGuiTop() - 8;
         if (x < 0 || x >= 54 || y < 0 || y >= 144) return;
 
+        var player = Minecraft.getInstance().player;
+        if (player == null) return;
+        ItemStack carried = player.containerMenu.getCarried();
         try {
-            var player = Minecraft.getInstance().player;
-            if (player == null) return;
-            ItemStack carried = player.containerMenu.getCarried();
             player.containerMenu.setCarried(ItemStack.EMPTY);
             Class<?> packetClass = Class.forName("top.theillusivec4.curios.common.network.client.CPacketOpenCurios");
             Object packet = packetClass.getConstructor(ItemStack.class).newInstance(carried);
@@ -37,8 +37,7 @@ public abstract class AbstractContainerScreenMixin {
             send.invoke(null, packet, extraPayloads);
             cir.setReturnValue(true);
         } catch (ReflectiveOperationException | RuntimeException ignored) {
-            var player = Minecraft.getInstance().player;
-            if (player != null) player.containerMenu.setCarried(ItemStack.EMPTY);
+            player.containerMenu.setCarried(carried);
             // If Curios cannot open its menu, allow vanilla click handling to continue.
         }
     }
