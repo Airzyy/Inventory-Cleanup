@@ -1,71 +1,69 @@
 package dev.airz.inventorycleanup.mixin;
 
-import java.util.Map;
-import java.util.Optional;
-
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import top.theillusivec4.curios.common.inventory.CurioSlot;
 
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin {
-    @Shadow(remap = false) @Final private RecipeBookComponent recipeBookComponent;
-
     @Inject(method = "init", at = @At("TAIL"), remap = false)
-    private void inventorycleanup$hidePlayerRecipeBook(CallbackInfo ci) {
-        if (this.recipeBookComponent.isVisible()) this.recipeBookComponent.toggleVisibility();
+    private void inventorycleanup$makeRoomForCurios(CallbackInfo ci) {
+        InventoryScreen screen = (InventoryScreen) (Object) this;
+        int count = 0;
+        for (Slot slot : screen.getMenu().slots) {
+            if (slot instanceof CurioSlot) count++;
+        }
+
+        int columns = count == 0 ? 0 : Math.max(1, (int) Math.ceil(count / 8.0));
+        int panelWidth = columns == 0 ? 0 : 14 + 18 * columns;
+        int centeredLeft = (screen.width - (176 + panelWidth)) / 2 + panelWidth;
+        ((AbstractContainerScreenAccessor) (Object) this).inventorycleanup$setLeftPos(centeredLeft);
+
+        var recipeBook = screen.getRecipeBookComponent();
+        if (recipeBook.isVisible()) recipeBook.toggleVisibility();
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"), remap = false)
-    private void inventorycleanup$renderCuriosSlots(GuiGraphics graphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
-        var player = Minecraft.getInstance().player;
-        if (player == null) return;
+    private void inventorycleanup$renderCuriosPanel(GuiGraphics graphics, float partialTick,
+                                                     int mouseX, int mouseY, CallbackInfo ci) {
+        InventoryScreen screen = (InventoryScreen) (Object) this;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int count = 0;
 
-        try {
-            Class<?> api = Class.forName("top.theillusivec4.curios.api.CuriosApi");
-            Object optionalObject = api.getMethod("getCuriosInventory", net.minecraft.world.entity.LivingEntity.class).invoke(null, player);
-            if (!(optionalObject instanceof Optional<?> optional) || optional.isEmpty()) return;
+        for (Slot slot : screen.getMenu().slots) {
+            if (!(slot instanceof CurioSlot)) continue;
+            minX = Math.min(minX, slot.x);
+            maxX = Math.max(maxX, slot.x);
+            minY = Math.min(minY, slot.y);
+            maxY = Math.max(maxY, slot.y);
+            count++;
+        }
+        if (count == 0) return;
 
-            Object handler = optional.get();
-            Class<?> handlerType = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler");
-            Map<?, ?> curios = (Map<?, ?>) handlerType.getMethod("getCurios").invoke(handler);
-            Class<?> stacksHandlerType = Class.forName("top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler");
-            Class<?> dynamicStacksType = Class.forName("top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler");
-            InventoryScreen screen = (InventoryScreen) (Object) this;
-            int baseX = screen.getGuiLeft() + 180;
-            int baseY = screen.getGuiTop() + 8;
-            int index = 0;
+        int left = screen.getGuiLeft() + minX - 4;
+        int top = screen.getGuiTop() + minY - 4;
+        int right = screen.getGuiLeft() + maxX + 20;
+        int bottom = screen.getGuiTop() + maxY + 20;
 
-            for (Map.Entry<?, ?> entry : curios.entrySet()) {
-                Object stacksHandler = entry.getValue();
-                boolean visible = (boolean) stacksHandlerType.getMethod("isVisible").invoke(stacksHandler);
-                if (!visible) continue;
-                Object stacks = stacksHandlerType.getMethod("getStacks").invoke(stacksHandler);
-                int slots = (int) dynamicStacksType.getMethod("getSlots").invoke(stacks);
-                for (int slot = 0; slot < slots; slot++) {
-                    int x = baseX + (index % 3) * 18;
-                    int y = baseY + (index / 3) * 18;
-                    graphics.fill(x, y, x + 18, y + 18, 0xFF373737);
-                    graphics.fill(x + 1, y + 1, x + 17, y + 17, 0xFF8B8B8B);
-                    graphics.fill(x + 2, y + 2, x + 16, y + 16, 0xFF373737);
-                    ItemStack stack = (ItemStack) dynamicStacksType.getMethod("getStackInSlot", int.class).invoke(stacks, slot);
-                    if (!stack.isEmpty()) {
-                        graphics.renderItem(stack, x + 1, y + 1);
-                        graphics.renderItemDecorations(Minecraft.getInstance().font, stack, x + 1, y + 1);
-                    }
-                    index++;
-                }
-            }
-        } catch (ReflectiveOperationException | RuntimeException ignored) {
-            // Curios is required by the mod metadata; reflection keeps its API out of the compile classpath.
+        graphics.fill(left, top, right, bottom, 0xFF171717);
+        graphics.fill(left + 1, top + 1, right - 1, bottom - 1, 0xFF777777);
+        graphics.fill(left + 2, top + 2, right - 2, bottom - 2, 0xFF303030);
+
+        for (Slot slot : screen.getMenu().slots) {
+            if (!(slot instanceof CurioSlot)) continue;
+            int x = screen.getGuiLeft() + slot.x;
+            int y = screen.getGuiTop() + slot.y;
+            graphics.fill(x - 1, y - 1, x + 17, y + 17, 0xFF171717);
+            graphics.fill(x, y, x + 16, y + 16, 0xFF8B8B8B);
+            graphics.fill(x + 1, y + 1, x + 15, y + 15, 0xFF373737);
         }
     }
 }
