@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -318,6 +319,11 @@ public final class InventoryScreenHandler {
                             new CPacketToggleRender(slot.getIdentifier(), slot.getSlotIndex()));
                 }
             }
+        }
+
+        @Override
+        protected void updateWidgetNarration(NarrationElementOutput narration) {
+            // This control is intentionally unlabeled; narration is omitted to preserve that design.
         }
 
         @Override
