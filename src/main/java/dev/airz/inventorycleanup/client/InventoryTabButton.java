@@ -1,6 +1,7 @@
 package dev.airz.inventorycleanup.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;\nimport com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -81,7 +82,10 @@ public final class InventoryTabButton extends Button {
         pose.translate(getX() + 28, getY() + 31, 0);
         pose.scale(-1.0F, 1.0F, 1.0F);
         pose.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+        // Mirroring reverses the quad winding; disable culling only for this tab texture.
+        RenderSystem.disableCull();
         graphics.blit(SKILL_TEXTURE, 0, 0, selected ? 31 : 0, 166, 31, 28);
+        RenderSystem.enableCull();
         pose.popPose();
 
         if (inventoryTab) {
