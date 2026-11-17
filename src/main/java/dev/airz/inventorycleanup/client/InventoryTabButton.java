@@ -69,6 +69,19 @@ public final class InventoryTabButton extends Button {
         }
     }
 
+    public static void renderArtwork(GuiGraphics graphics, int x, int y, boolean selected) {
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        // Draw the tab before the inventory texture so the inventory frame is layered over it.
+        pose.translate(x, y, 0);
+        pose.scale(-1.0F, 1.0F, 1.0F);
+        pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
+        RenderSystem.disableCull();
+        graphics.blit(SKILL_TEXTURE, 0, 0, selected ? 31 : 0, 166, 31, 28);
+        RenderSystem.enableCull();
+        pose.popPose();
+    }
+
     @Override
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         boolean selected = inventoryTab
@@ -76,19 +89,9 @@ public final class InventoryTabButton extends Button {
                         "net.bandit.reskillable.client.screen.SkillScreen")
                 : owner.getClass().getName().equals("net.bandit.reskillable.client.screen.SkillScreen");
 
-        PoseStack pose = graphics.pose();
-        pose.pushPose();
-        // Rotate the side-tab artwork into the top edge, then mirror it horizontally.
-        // Anchor the rotated 31x28 quad at the button origin; the previous full-size
-        // translation shifted its artwork down and right of its clickable bounds.
-        pose.translate(getX(), getY(), 0);
-        pose.scale(-1.0F, 1.0F, 1.0F);
-        pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
-        // Mirroring reverses the quad winding; disable culling only for this tab texture.
-        RenderSystem.disableCull();
-        graphics.blit(SKILL_TEXTURE, 0, 0, selected ? 31 : 0, 166, 31, 28);
-        RenderSystem.enableCull();
-        pose.popPose();
+        if (!(owner instanceof InventoryScreen)) {
+            renderArtwork(graphics, getX(), getY(), selected);
+        }
 
         if (inventoryTab) {
             graphics.renderItem(Items.CHEST.getDefaultInstance(), getX() + 6, getY() + 7);
