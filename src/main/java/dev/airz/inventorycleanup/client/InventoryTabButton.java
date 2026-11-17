@@ -79,7 +79,9 @@ public final class InventoryTabButton extends Button {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         // Rotate the side-tab artwork into the top edge, then mirror it horizontally.
-        pose.translate(getX() + 28, getY() + 31, 0);
+        // Anchor the rotated 31x28 quad at the button origin; the previous full-size
+        // translation shifted its artwork down and right of its clickable bounds.
+        pose.translate(getX(), getY(), 0);
         pose.scale(-1.0F, 1.0F, 1.0F);
         pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
         // Mirroring reverses the quad winding; disable culling only for this tab texture.
