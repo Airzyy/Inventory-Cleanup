@@ -1,5 +1,7 @@
 package dev.airz.inventorycleanup.mixin;
 
+import dev.airz.inventorycleanup.CuriosMenuSlots;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -7,16 +9,20 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.common.inventory.CurioSlot;
 
 @Mixin(InventoryMenu.class)
 public abstract class InventoryMenuMixin {
+    @Inject(method = "<init>", at = @At("TAIL"), remap = false)
+    private void inventorycleanup$addCuriosSlots(Inventory inventory, boolean active, Player owner, CallbackInfo ci) {
+        CuriosMenuSlots.addToInventoryMenu(owner, (InventoryMenu) (Object) this);
+    }
+
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true, remap = false)
     private void inventorycleanup$quickMoveCurios(Player player, int index,
                                                    CallbackInfoReturnable<ItemStack> cir) {
-        if (player.isCreative()) return;
         InventoryMenu menu = (InventoryMenu) (Object) this;
         if (index < 0 || index >= menu.slots.size()) return;
 
