@@ -30,6 +30,10 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-AoutRefMapFile=${layout.buildDirectory.file('tmp/compileJava/inventorycleanup.refmap.json').get().asFile}"]
+}
+
 jar {
     manifest.attributes(['MixinConfigs': 'inventorycleanup.mixins.json'])
 }
