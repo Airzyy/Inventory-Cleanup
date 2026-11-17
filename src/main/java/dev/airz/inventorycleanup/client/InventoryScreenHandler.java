@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import dev.airz.inventorycleanup.mixin.client.SlotPositionAccessor;
+import dev.airz.inventorycleanup.CuriosMenuSlots;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -51,7 +52,9 @@ public final class InventoryScreenHandler {
 
         Player player = Minecraft.getInstance().player;
         if (screen instanceof InventoryScreen inventoryScreen && player != null) {
-            // The custom Inventory tab opens InventoryScreen even in Creative.
+            // Curios syncs the player's slot capability after the client player/menu is
+            // constructed. Mirror the server's slots now, before the inventory can be used.
+            CuriosMenuSlots.addToInventoryMenu(player, inventoryScreen.getMenu());
             // Keep the menu's slot indices intact, but move Curios hitboxes/rendering off-screen.
             setCuriosSlotsVisible(inventoryScreen.getMenu(), !player.isCreative());
         }
