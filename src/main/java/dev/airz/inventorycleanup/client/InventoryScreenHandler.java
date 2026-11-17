@@ -117,6 +117,7 @@ public final class InventoryScreenHandler {
                     continue;
                 }
 
+                int originalSize = slots.size();
                 slots.remove(i);
                 // Creative's wrapper menu is client-only. Keep its parallel slot snapshots aligned.
                 for (Class<?> type = menu.getClass(); type != null; type = type.getSuperclass()) {
@@ -124,7 +125,7 @@ public final class InventoryScreenHandler {
                         if (!List.class.isAssignableFrom(field.getType())) continue;
                         field.setAccessible(true);
                         Object value = field.get(menu);
-                        if (value instanceof List<?> list && list != slots && list.size() == slots.size() + 1) {
+                        if (value instanceof List<?> list && list != slots && list.size() == originalSize) {
                             try {
                                 ((List<?>) list).remove(i);
                             } catch (UnsupportedOperationException ignored) {
