@@ -4,6 +4,6 @@
   "package": "dev.airz.inventorycleanup.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "inventorycleanup.refmap.json",
-  "client": ["InventoryScreenMixin"],
+  "client": ["InventoryScreenMixin", "AbstractContainerScreenMixin"],
   "injectors": { "defaultRequire": 1 }
 }
