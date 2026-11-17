@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.spongepowered:mixin:0.8.7'
     annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
     compileOnly "top.theillusivec4.curios:curios-neoforge:${project.curios_version}"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${project.curios_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
