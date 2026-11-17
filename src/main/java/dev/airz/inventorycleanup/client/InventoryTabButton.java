@@ -81,7 +81,7 @@ public final class InventoryTabButton extends Button {
         // Rotate the side-tab artwork into the top edge, then mirror it horizontally.
         pose.translate(getX() + 28, getY() + 31, 0);
         pose.scale(-1.0F, 1.0F, 1.0F);
-        pose.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+        pose.mulPose(Axis.ZP.rotationDegrees(90.0F));
         // Mirroring reverses the quad winding; disable culling only for this tab texture.
         RenderSystem.disableCull();
         graphics.blit(SKILL_TEXTURE, 0, 0, selected ? 31 : 0, 166, 31, 28);
