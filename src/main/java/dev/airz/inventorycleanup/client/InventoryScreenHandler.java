@@ -1,5 +1,7 @@
 package dev.airz.inventorycleanup.client;
 
+import dev.airz.inventorycleanup.CuriosMenuSlots;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -18,6 +20,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
@@ -31,6 +34,13 @@ public final class InventoryScreenHandler {
             "net.bandit.reskillable.client.screen.buttons.TabButton";
 
     private InventoryScreenHandler() {}
+
+
+    @SubscribeEvent
+    public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+        var player = event.getPlayer();
+        CuriosMenuSlots.addToInventoryMenu(player, player.inventoryMenu);
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
