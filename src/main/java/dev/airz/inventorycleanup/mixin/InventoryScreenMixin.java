@@ -35,7 +35,10 @@ public abstract class InventoryScreenMixin {
             if (!(optionalObject instanceof Optional<?> optional) || optional.isEmpty()) return;
 
             Object handler = optional.get();
-            Map<?, ?> curios = (Map<?, ?>) handler.getClass().getMethod("getCurios").invoke(handler);
+            Class<?> handlerType = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler");
+            Map<?, ?> curios = (Map<?, ?>) handlerType.getMethod("getCurios").invoke(handler);
+            Class<?> stacksHandlerType = Class.forName("top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler");
+            Class<?> dynamicStacksType = Class.forName("top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler");
             InventoryScreen screen = (InventoryScreen) (Object) this;
             int baseX = screen.getGuiLeft() + 180;
             int baseY = screen.getGuiTop() + 8;
@@ -43,17 +46,17 @@ public abstract class InventoryScreenMixin {
 
             for (Map.Entry<?, ?> entry : curios.entrySet()) {
                 Object stacksHandler = entry.getValue();
-                boolean visible = (boolean) stacksHandler.getClass().getMethod("isVisible").invoke(stacksHandler);
+                boolean visible = (boolean) stacksHandlerType.getMethod("isVisible").invoke(stacksHandler);
                 if (!visible) continue;
-                Object stacks = stacksHandler.getClass().getMethod("getStacks").invoke(stacksHandler);
-                int slots = (int) stacks.getClass().getMethod("getSlots").invoke(stacks);
+                Object stacks = stacksHandlerType.getMethod("getStacks").invoke(stacksHandler);
+                int slots = (int) dynamicStacksType.getMethod("getSlots").invoke(stacks);
                 for (int slot = 0; slot < slots; slot++) {
                     int x = baseX + (index % 3) * 18;
                     int y = baseY + (index / 3) * 18;
                     graphics.fill(x, y, x + 18, y + 18, 0xFF373737);
                     graphics.fill(x + 1, y + 1, x + 17, y + 17, 0xFF8B8B8B);
                     graphics.fill(x + 2, y + 2, x + 16, y + 16, 0xFF373737);
-                    ItemStack stack = (ItemStack) stacks.getClass().getMethod("getStackInSlot", int.class).invoke(stacks, slot);
+                    ItemStack stack = (ItemStack) dynamicStacksType.getMethod("getStackInSlot", int.class).invoke(stacks, slot);
                     if (!stack.isEmpty()) {
                         graphics.renderItem(stack, x + 1, y + 1);
                         graphics.renderItemDecorations(Minecraft.getInstance().font, stack, x + 1, y + 1);
