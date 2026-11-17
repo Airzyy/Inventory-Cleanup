@@ -36,5 +36,8 @@ tasks.withType(JavaCompile).configureEach {
 
 jar {
     from(layout.buildDirectory.file('tmp/compileJava/inventorycleanup.refmap.json'))
-    manifest.attributes(['MixinConfigs': 'inventorycleanup.mixins.json'])
+    manifest.attributes([
+        'MixinConfigs': 'inventorycleanup.mixins.json',
+        'Implementation-Version': project.version
+    ])
 }
