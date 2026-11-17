@@ -63,7 +63,6 @@ public final class InventoryTabButton extends Button {
         ItemStack carried = player.containerMenu.getCarried().copy();
         if (player.containerMenu != player.inventoryMenu) {
             player.containerMenu.setCarried(ItemStack.EMPTY);
-            player.clientSideCloseContainer();
             player.inventoryMenu.setCarried(carried);
             PacketDistributor.sendToServer(new CPacketOpenVanilla(carried));
         }
