@@ -21,7 +21,7 @@ public abstract class InventoryScreenMixin {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void inventorycleanup$hidePlayerRecipeBook(CallbackInfo ci) {
-        this.recipeBookComponent.setVisible(false);
+        if (this.recipeBookComponent.isVisible()) this.recipeBookComponent.toggleVisibility();
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"))
