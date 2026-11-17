@@ -273,27 +273,29 @@ public final class InventoryScreenHandler {
     
     private static void addCuriosRenderToggle(ScreenEvent.Init.Post event,
                                                InventoryScreen screen, int left, int top) {
-        List<CurioSlot> curioSlots = screen.getMenu().slots.stream()
+        List<CurioSlot> allCurioSlots = screen.getMenu().slots.stream()
                 .filter(slot -> slot instanceof CurioSlot)
                 .map(slot -> (CurioSlot) slot)
+                .toList();
+        List<CurioSlot> toggleableSlots = allCurioSlots.stream()
                 .filter(CurioSlot::canToggleRender)
                 .toList();
-        if (curioSlots.isEmpty()) return;
+        if (toggleableSlots.isEmpty()) return;
 
-        // CuriosMenuSlots lays slots out in columns, eight rows at a time.
+        // Place the control in the next cell after the final Curios slot.
         TreeSet<Integer> columns = new TreeSet<>();
         int minX = Integer.MAX_VALUE;
         int minY = Integer.MAX_VALUE;
-        for (CurioSlot slot : curioSlots) {
+        for (CurioSlot slot : allCurioSlots) {
             columns.add(slot.x);
             minX = Math.min(minX, slot.x);
             minY = Math.min(minY, slot.y);
         }
         int columnCount = Math.max(1, columns.size());
-        int nextIndex = curioSlots.size();
+        int nextIndex = allCurioSlots.size();
         int checkboxX = left + minX + (nextIndex % columnCount) * 18 + 2;
         int checkboxY = top + minY + (nextIndex / columnCount) * 18 + 2;
-        event.addListener(new CuriosRenderCheckbox(checkboxX, checkboxY, curioSlots));
+        event.addListener(new CuriosRenderCheckbox(checkboxX, checkboxY, toggleableSlots));
     }
 
     /** A compact, unlabeled master switch for Curios item rendering. */
