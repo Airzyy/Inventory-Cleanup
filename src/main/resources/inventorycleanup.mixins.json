@@ -10,7 +10,8 @@
   ],
   "client": [
     "InventoryScreenMixin",
-    "AbstractContainerScreenAccessor"
+    "AbstractContainerScreenAccessor",
+    "SlotPositionAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
