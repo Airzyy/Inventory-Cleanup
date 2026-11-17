@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import dev.airz.inventorycleanup.mixin.client.SlotPositionAccessor;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -93,13 +94,13 @@ public final class InventoryScreenHandler {
             if (visible) {
                 int[] original = CURIO_SLOT_POSITIONS.remove(slot);
                 if (original != null) {
-                    slot.x = original[0];
-                    slot.y = original[1];
+                    ((SlotPositionAccessor) (Object) slot).inventorycleanup$setX(original[0]);
+                    ((SlotPositionAccessor) (Object) slot).inventorycleanup$setY(original[1]);
                 }
             } else {
                 CURIO_SLOT_POSITIONS.putIfAbsent(slot, new int[] {slot.x, slot.y});
-                slot.x = -10000;
-                slot.y = -10000;
+                ((SlotPositionAccessor) (Object) slot).inventorycleanup$setX(-10000);
+                ((SlotPositionAccessor) (Object) slot).inventorycleanup$setY(-10000);
             }
         }
     }
