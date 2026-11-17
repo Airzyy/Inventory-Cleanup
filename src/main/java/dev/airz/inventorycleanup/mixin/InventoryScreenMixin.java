@@ -17,14 +17,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin {
-    @Shadow @Final private RecipeBookComponent recipeBookComponent;
+    @Shadow(remap = false) @Final private RecipeBookComponent recipeBookComponent;
 
-    @Inject(method = "init", at = @At("TAIL"))
+    @Inject(method = "init", at = @At("TAIL"), remap = false)
     private void inventorycleanup$hidePlayerRecipeBook(CallbackInfo ci) {
         if (this.recipeBookComponent.isVisible()) this.recipeBookComponent.toggleVisibility();
     }
 
-    @Inject(method = "renderBg", at = @At("TAIL"))
+    @Inject(method = "renderBg", at = @At("TAIL"), remap = false)
     private void inventorycleanup$renderCuriosSlots(GuiGraphics graphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         var player = Minecraft.getInstance().player;
         if (player == null) return;
