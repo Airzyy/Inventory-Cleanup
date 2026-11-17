@@ -10,6 +10,7 @@
   ],
   "client": [
     "InventoryScreenMixin",
+    "StorageScreenBaseMixin",
     "CuriosClientPacketsMixin",
     "AbstractContainerScreenAccessor",
     "client.SlotPositionAccessor"

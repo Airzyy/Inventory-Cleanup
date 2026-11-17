@@ -49,13 +49,9 @@ public abstract class InventoryScreenMixin {
     @Inject(method = "renderBg", at = @At("HEAD"), remap = false)
     private void inventorycleanup$renderTabsBehindInventory(GuiGraphics graphics, float partialTick,
                                                               int mouseX, int mouseY, CallbackInfo ci) {
-        InventoryScreen screen = (InventoryScreen) (Object) this;
-        int left = screen.getGuiLeft();
-        int top = screen.getGuiTop();
-        dev.airz.inventorycleanup.client.InventoryTabButton.renderArtwork(
-                graphics, left, top - 28, true);
-        dev.airz.inventorycleanup.client.InventoryTabButton.renderArtwork(
-                graphics, left + 31, top - 28, false);
+        // Draws Inventory, Skills and any backpack tabs at the positions their buttons report.
+        dev.airz.inventorycleanup.client.InventoryTabButton.renderArtworkBehindFrame(
+                (InventoryScreen) (Object) this, graphics);
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"), remap = false)

@@ -67,7 +67,14 @@ public final class InventoryScreenHandler {
         boolean inventory = screen instanceof InventoryScreen;
         boolean skills = screen.getClass().getName().equals(SKILL_SCREEN);
         boolean curios = screen.getClass().getName().equals(CURIOS_SCREEN);
-        if (!inventory && !skills && !curios) return;
+        boolean backpackScreen = BackpackCompat.isBackpackScreen(screen);
+        if (!inventory && !skills && !curios && !backpackScreen) return;
+
+        if (backpackScreen) {
+            // Sophisticated Backpacks owns this screen: only add the tab row, leave its widgets alone.
+            addTabs(event, screen, player);
+            return;
+        }
 
         for (GuiEventListener listener : List.copyOf(screen.children())) {
             String name = listener.getClass().getName();
@@ -92,10 +99,31 @@ public final class InventoryScreenHandler {
         installCosmeticSlotVisibility();
         int left = getGuiLeft(screen);
         int top = getGuiTop(screen);
-        event.addListener(new InventoryTabButton(screen, left, top - 28, true));
-        event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
+        addTabs(event, screen, player);
         if (inventory) {
             addCuriosRenderToggle(event, (InventoryScreen) screen, left, top);
+        }
+    }
+
+    /**
+     * Adds the tab row: Inventory, Skills, then one tab per carried Sophisticated Backpacks backpack
+     * (in the order the open-backpack keybind searches, so the first one is the keybind's backpack).
+     */
+    private static void addTabs(ScreenEvent.Init.Post event, Screen screen, Player player) {
+        boolean backpackScreen = BackpackCompat.isBackpackScreen(screen);
+        // Backpack screens can be as tall as the window. Without 28px above the frame the row would
+        // be cut off, so it is skipped there (the screen is also shortened to leave room, see
+        // StorageScreenBaseMixin).
+        if (backpackScreen && getGuiTop(screen) < -InventoryTabButton.ROW_OFFSET_Y) return;
+
+        int index = 0;
+        event.addListener(new InventoryTabButton(screen, InventoryTabButton.Kind.INVENTORY, null, index++));
+        event.addListener(new InventoryTabButton(screen, InventoryTabButton.Kind.SKILLS, null, index++));
+
+        if (player == null) return;
+        for (BackpackCompat.BackpackRef backpack : BackpackCompat.findBackpacks(player)) {
+            if (!InventoryTabButton.fitsOnScreen(screen, index)) break;
+            event.addListener(new InventoryTabButton(screen, InventoryTabButton.Kind.BACKPACK, backpack, index++));
         }
     }
 
@@ -196,12 +224,12 @@ public final class InventoryScreenHandler {
         }
     }
 
-    private static int getGuiLeft(Screen screen) {
+    static int getGuiLeft(Screen screen) {
         if (screen instanceof AbstractContainerScreen<?> container) return container.getGuiLeft();
         return (screen.width - 176) / 2;
     }
 
-    private static int getGuiTop(Screen screen) {
+    static int getGuiTop(Screen screen) {
         if (screen instanceof AbstractContainerScreen<?> container) return container.getGuiTop();
         return (screen.height - 166) / 2;
     }
