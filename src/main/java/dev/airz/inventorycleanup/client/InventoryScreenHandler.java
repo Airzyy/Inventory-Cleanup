@@ -3,15 +3,11 @@ package dev.airz.inventorycleanup.client;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
@@ -32,7 +28,7 @@ public final class InventoryScreenHandler {
             for (GuiEventListener listener : List.copyOf(screen.children())) {
                 String name = listener.getClass().getName();
                 if (name.equals("top.theillusivec4.curios.client.gui.CuriosButton")
-                        || name.equals("dev.shadowsoffire.apothic_attributes.client.AttributesGui")) {
+                        || name.startsWith("dev.shadowsoffire.apothic_attributes.client.AttributesGui$")) {
                     screen.removeWidget(listener);
                 }
             }
