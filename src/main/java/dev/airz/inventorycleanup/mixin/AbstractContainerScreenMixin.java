@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin {
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true, remap = false)
     private void inventorycleanup$openCuriosFromInlineSlots(double mouseX, double mouseY, int button,
                                                               CallbackInfoReturnable<Boolean> cir) {
         if (button != 0 || !((Object) this instanceof InventoryScreen screen)) return;
