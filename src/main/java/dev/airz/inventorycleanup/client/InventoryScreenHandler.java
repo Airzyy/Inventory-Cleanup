@@ -35,9 +35,11 @@ public final class InventoryScreenHandler {
 
             // Reskillable's tab uses GUI-relative coordinates. Put it beside the new inventory tab.
             setReskillableTabPosition(31, -28);
+            moveExistingReskillableTab(screen, 31, -28);
             addInventoryTab(screen, true);
         } else if (screen.getClass().getName().equals("net.bandit.reskillable.client.screen.SkillScreen")) {
             setReskillableTabPosition(31, -28);
+            moveExistingReskillableTab(screen, 31, -28);
             addInventoryTab(screen, false);
         }
     }
@@ -48,6 +50,22 @@ public final class InventoryScreenHandler {
             tabs.getMethod("setPosition", int.class, int.class).invoke(null, x, y);
         } catch (ReflectiveOperationException ignored) {
             // Reskillable is an optional integration at runtime.
+        }
+    }
+
+    private static void moveExistingReskillableTab(Screen screen, int x, int y) {
+        for (GuiEventListener listener : screen.children()) {
+            if (!listener.getClass().getName().equals("net.bandit.reskillable.client.screen.buttons.TabButton")) continue;
+            try {
+                var relX = listener.getClass().getDeclaredField("relX");
+                var relY = listener.getClass().getDeclaredField("relY");
+                relX.setAccessible(true);
+                relY.setAccessible(true);
+                relX.setInt(listener, x);
+                relY.setInt(listener, y);
+            } catch (ReflectiveOperationException ignored) {
+                // The saved position above remains the fallback for future screen openings.
+            }
         }
     }
 
