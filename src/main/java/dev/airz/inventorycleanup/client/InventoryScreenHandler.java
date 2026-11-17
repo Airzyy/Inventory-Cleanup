@@ -12,6 +12,9 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -62,6 +65,10 @@ public final class InventoryScreenHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         Screen screen = event.getScreen();
+        if (screen instanceof CreativeModeInventoryScreen creativeScreen) {
+            removeCuriosSlotsFromCreativeMenu(creativeScreen.getMenu());
+            return;
+        }
         if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative()) return;
         boolean inventory = screen instanceof InventoryScreen;
         boolean skills = screen.getClass().getName().equals(SKILL_SCREEN);
@@ -93,6 +100,44 @@ public final class InventoryScreenHandler {
         int top = getGuiTop(screen);
         event.addListener(new InventoryTabButton(screen, left, top - 28, true));
         event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
+    }
+
+    private static void removeCuriosSlotsFromCreativeMenu(AbstractContainerMenu menu) {
+        try {
+            List<Slot> slots = menu.slots;
+            for (int i = slots.size() - 1; i >= 0; i--) {
+                Slot slot = slots.get(i);
+                if (!slot.getClass().getName().equals(
+                        "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen$SlotWrapper")) {
+                    continue;
+                }
+                Field targetField = slot.getClass().getDeclaredField("target");
+                targetField.setAccessible(true);
+                if (!(targetField.get(slot) instanceof top.theillusivec4.curios.common.inventory.CurioSlot)) {
+                    continue;
+                }
+
+                slots.remove(i);
+                // Creative's wrapper menu is client-only. Keep its parallel slot snapshots aligned.
+                for (Class<?> type = menu.getClass(); type != null; type = type.getSuperclass()) {
+                    for (Field field : type.getDeclaredFields()) {
+                        if (!List.class.isAssignableFrom(field.getType())) continue;
+                        field.setAccessible(true);
+                        Object value = field.get(menu);
+                        if (value instanceof List<?> list && list != slots && list.size() == slots.size() + 1) {
+                            try {
+                                ((List<?>) list).remove(i);
+                            } catch (UnsupportedOperationException ignored) {
+                                // Not a mutable slot snapshot.
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < slots.size(); i++) slots.get(i).index = i;
+        } catch (ReflectiveOperationException ignored) {
+            // Creative inventory remains usable if vanilla changes its slot wrapper implementation.
+        }
     }
 
     private static void removeCuriosRecipeBook(ScreenEvent.Init.Post event, Screen screen) {
