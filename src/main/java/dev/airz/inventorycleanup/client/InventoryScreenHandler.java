@@ -60,7 +60,7 @@ public final class InventoryScreenHandler {
 
         for (GuiEventListener listener : List.copyOf(screen.children())) {
             String name = listener.getClass().getName();
-            if ((inventory && listener instanceof ImageButton)
+            if ((inventory && listener.getClass() == ImageButton.class)
                     || name.equals(RESKILLABLE_TAB)
                     || name.equals("top.theillusivec4.curios.client.gui.button.CuriosButton")
                     || name.equals("top.theillusivec4.curios.client.gui.CuriosButton")
