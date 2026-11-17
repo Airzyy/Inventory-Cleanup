@@ -16,8 +16,8 @@ public final class CuriosMenuSlots {
     private CuriosMenuSlots() {}
 
     public static void addToInventoryMenu(Player player, InventoryMenu menu) {
-        // The compact Curios panel is intentionally survival/adventure-only.
-        if (player == null || player.isCreative()) return;
+        // Do not query the game mode here: InventoryMenu is constructed before
+        // ServerPlayer.gameMode is initialized. The client hides these slots in Creative.
 
         for (Slot slot : menu.slots) {
             if (slot instanceof CurioSlot) return;
