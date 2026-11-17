@@ -35,6 +35,8 @@ public final class InventoryScreenHandler {
     private static final String RESKILLABLE_TAB =
             "net.bandit.reskillable.client.screen.buttons.TabButton";
 
+    private static final java.util.Map<Slot, int[]> CURIO_SLOT_POSITIONS = new java.util.IdentityHashMap<>();
+
     private InventoryScreenHandler() {}
 
 
@@ -45,7 +47,14 @@ public final class InventoryScreenHandler {
             removeCuriosSlotsFromCreativeMenu(creativeScreen);
             return;
         }
-        if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative()) return;
+
+        Player player = Minecraft.getInstance().player;
+        if (screen instanceof InventoryScreen inventoryScreen && player != null) {
+            // The custom Inventory tab opens InventoryScreen even in Creative.
+            // Keep the menu's slot indices intact, but move Curios hitboxes/rendering off-screen.
+            setCuriosSlotsVisible(inventoryScreen.getMenu(), !player.isCreative());
+        }
+        if (player != null && player.isCreative()) return;
         boolean inventory = screen instanceof InventoryScreen;
         boolean skills = screen.getClass().getName().equals(SKILL_SCREEN);
         boolean curios = screen.getClass().getName().equals(CURIOS_SCREEN);
@@ -76,6 +85,23 @@ public final class InventoryScreenHandler {
         int top = getGuiTop(screen);
         event.addListener(new InventoryTabButton(screen, left, top - 28, true));
         event.addListener(new InventoryTabButton(screen, left + 31, top - 28, false));
+    }
+
+    private static void setCuriosSlotsVisible(AbstractContainerMenu menu, boolean visible) {
+        for (Slot slot : menu.slots) {
+            if (!(slot instanceof top.theillusivec4.curios.common.inventory.CurioSlot)) continue;
+            if (visible) {
+                int[] original = CURIO_SLOT_POSITIONS.remove(slot);
+                if (original != null) {
+                    slot.x = original[0];
+                    slot.y = original[1];
+                }
+            } else {
+                CURIO_SLOT_POSITIONS.putIfAbsent(slot, new int[] {slot.x, slot.y});
+                slot.x = -10000;
+                slot.y = -10000;
+            }
+        }
     }
 
     private static Slot findWrappedSlot(Slot wrapper) {
