@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import top.theillusivec4.curios.common.inventory.CurioSlot;
 
 @Mixin(InventoryScreen.class)
@@ -26,6 +27,38 @@ public abstract class InventoryScreenMixin {
 
         var recipeBook = screen.getRecipeBookComponent();
         if (recipeBook.isVisible()) recipeBook.toggleVisibility();
+    }
+
+
+    @Inject(method = "hasClickedOutside", at = @At("HEAD"), cancellable = true, remap = false)
+    private void inventorycleanup$treatCuriosPanelAsInside(double mouseX, double mouseY,
+                                                            int guiLeft, int guiTop, int mouseButton,
+                                                            CallbackInfoReturnable<Boolean> cir) {
+        InventoryScreen screen = (InventoryScreen) (Object) this;
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        boolean found = false;
+
+        for (Slot slot : screen.getMenu().slots) {
+            if (!(slot instanceof CurioSlot)) continue;
+            found = true;
+            minX = Math.min(minX, slot.x);
+            maxX = Math.max(maxX, slot.x);
+            minY = Math.min(minY, slot.y);
+            maxY = Math.max(maxY, slot.y);
+        }
+        if (!found) return;
+
+        int panelLeft = guiLeft + minX - 4;
+        int panelTop = guiTop + minY - 4;
+        int panelRight = guiLeft;
+        int panelBottom = guiTop + maxY + 20;
+        if (mouseX >= panelLeft && mouseX < panelRight
+                && mouseY >= panelTop && mouseY < panelBottom) {
+            cir.setReturnValue(false);
+        }
     }
 
     @Inject(method = "renderBg", at = @At("TAIL"), remap = false)
